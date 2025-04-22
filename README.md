@@ -12,21 +12,17 @@ Execute este comando único:
 curl -sL https://raw.githubusercontent.com/Degaultnameu/termux-menu/main/install.sh | bash
 
 🛠️ Instalação Manual
-1. Clonar o repositório
-bash
+
 git clone https://github.com/Degaultnameu/termux-menu.git ~/termux-menu
-2. Acessar a pasta
-bash
+
 cd ~/termux-menu
-3. Dar permissão de execução
-bash
+
 chmod +x install.sh
-4. Executar instalação
-bash
+
 ./install.sh
-5. Reiniciar o Termux
-bash
+
 exit
+
 🚑 Solução de Problemas
 Se a pasta já existir:
 bash
