@@ -58,11 +58,10 @@ class TermuxProMenu(App):
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
                 yield Button("LISTAR JANELAS", id="windows", classes="btn")
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
-                yield Button("FECHAR TODAS SESSÕES", id="close_sessions", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
                 yield Input(placeholder="Digite algo...", id="user_input")
-                yield Button("ENTER", id="enter_button", classes="btn")
+                yield Button("ENCERRAR TODAS SESSÕES", id="enter_button", classes="btn")
                 yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
 
     @on(Button.Pressed, "#terminal")
