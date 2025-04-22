@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from textual.app import App, ComposeResult
 from textual.widgets import Button, Static, Input
 from textual.containers import Center, Vertical
@@ -56,13 +57,13 @@ class TermuxProMenu(App):
                 yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
                 yield Button("LISTAR JANELAS", id="windows", classes="btn")
-                yield Button("FECHAR TODAS SESSÕES", id="close_sessions", classes="btn")
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
+                yield Button("FECHAR TODAS SESSÕES", id="close_sessions", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
-                yield Input(placeholder="Digite algo...", id="edit_text")
+                yield Input(placeholder="Digite algo...", id="user_input")
                 yield Button("ENTER", id="enter_button", classes="btn")
-                yield Button("REDEFINIR CONFIG", id="reset_button", classes="btn")
+                yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -77,8 +78,8 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
-        """Limpa a tela"""
-        self.query_one("#output", Static).update("")
+        """Limpa a tela e exibe a mensagem padrão"""
+        self.query_one("#output", Static).update("Welcome to Termux!\nDocs: https://termux.dev/docs\nDonate: https://termux.dev/donate\nCommunity: https://termux.dev/community\n\nWorking with packages:\n - Search:  pkg search <query>\n - Install: pkg install <package>\n - Upgrade: pkg upgrade\n\nSubscribing to additional repositories:\n - Root: pkg install root-repo\n - X11: pkg install x11-repo\n\nFor fixing any repository issues, try 'termux-change-repo' command.\n\nReport issues at https://termux.dev/issues")
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
@@ -90,22 +91,37 @@ class TermuxProMenu(App):
         """Edita configuração"""
         self.run_command("nano ~/.termux/termux.properties", "Editando config...")
 
-    @on(Button.Pressed, "#close_sessions")
-    def close_sessions(self):
-        """Fecha todas as sessões"""
-        self.query_one("#output", Static).update("Por favor, pressione ENTER para confirmar")
-        self.query_one("#enter_button", Button).update("Pressione para fechar todas as sessões")
-    
-    @on(Button.Pressed, "#enter_button")
-    def press_enter(self):
-        """Simula o pressionamento de Enter e fecha as sessões"""
-        self.query_one("#output", Static).update("Fechando todas as sessões...")
-        self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
-
     @on(Button.Pressed, "#exit")
     def exit_app(self):
         """Sai do aplicativo"""
         self.exit()
+
+    @on(Button.Pressed, "#close_sessions")
+    def close_sessions(self):
+        """Fecha todas as sessões"""
+        self.query_one("#output", Static).update("Fechando todas as sessões... Pressione 'Enter' para continuar.")
+        self.query_one("#enter_button", Button).show()
+
+    @on(Button.Pressed, "#enter_button")
+    def press_enter(self):
+        """Simula pressionamento de 'Enter' para continuar o processo"""
+        # Fecha todas as sessões com o comando kill
+        self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
+
+        # Atualiza o texto para indicar que as sessões foram fechadas
+        self.query_one("#output", Static).update("Todas as sessões foram fechadas. Pressione 'Enter' para continuar.")
+
+        # Esconde o botão de "Enter" após a ação
+        self.query_one("#enter_button", Button).hide()
+
+    @on(Button.Pressed, "#alter_phrase")
+    def alter_phrase(self):
+        """Altera a frase padrão"""
+        input_text = self.query_one("#user_input", Input).value
+        if input_text:
+            self.query_one("#output", Static).update(input_text)
+        else:
+            self.query_one("#output", Static).update("Por favor, insira um texto válido para alterar.")
 
     def run_command(self, command: str, success_msg: str = ""):
         """Executa comandos no terminal"""
@@ -126,4 +142,3 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-    
