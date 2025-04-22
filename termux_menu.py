@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 from textual.app import App, ComposeResult
-from textual.widgets import Button, Static, Input
+from textual.widgets import Button, Static, Input, ScrollView
 from textual.containers import Center, Vertical
 from textual import on
 import subprocess
-import os
 
 FRASE_ORIGINAL = """Welcome to Termux!
 
@@ -80,20 +79,21 @@ class TermuxProMenu(App):
 
     def compose(self) -> ComposeResult:
         with Center():
-            with Vertical(id="main"):
-                yield Static("RUSC521 TERMINAL", id="title")
-                yield Button("TERMINAL", id="terminal", classes="btn")
-                yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
-                yield Button("LIMPAR TELA", id="clear", classes="btn")
-                yield Button("LISTAR JANELAS", id="windows", classes="btn")
-                yield Button("EDITAR CONFIG", id="config", classes="btn")
-                yield Button("SAIR", id="exit", classes="btn")
-                yield Static("", id="output")
-                yield Input(placeholder="Digite algo...", id="user_input")
-                yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
-                yield Button("RESTAURAR FRASE ORIGINAL", id="reset_phrase", classes="btn")
-                yield Button("ENCERRAR TODAS SESSÕES", id="close_sessions", classes="btn")
-                yield Button("ENTER", id="enter_button", classes="btn")
+            with ScrollView(id="main"):
+                with Vertical():
+                    yield Static("RUSC521 TERMINAL", id="title")
+                    yield Button("TERMINAL", id="terminal", classes="btn")
+                    yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
+                    yield Button("LIMPAR TELA", id="clear", classes="btn")
+                    yield Button("LISTAR JANELAS", id="windows", classes="btn")
+                    yield Button("EDITAR CONFIG", id="config", classes="btn")
+                    yield Button("SAIR", id="exit", classes="btn")
+                    yield Static("", id="output")
+                    yield Input(placeholder="Digite algo...", id="user_input")
+                    yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
+                    yield Button("RESTAURAR FRASE ORIGINAL", id="reset_phrase", classes="btn")
+                    yield Button("ENCERRAR TODAS SESSÕES", id="close_sessions", classes="btn")
+                    yield Button("ENTER", id="enter_button", classes="btn")
 
     def on_mount(self):
         self.query_one("#output", Static).update(self.frase_atual)
@@ -166,4 +166,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-                
+ 
