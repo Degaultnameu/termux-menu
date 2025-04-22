@@ -5,34 +5,9 @@ from textual.containers import Center, Vertical
 from textual import on
 import subprocess
 import os
-import signal
 
 class TermuxProMenu(App):
     """Menu Termux Premium com Funções Reais"""
-
-    CONFIG_FILE = os.path.expanduser("~/.termux/welcome_message.txt")
-    DEFAULT_MESSAGE = """Welcome to Termux!
-
-Docs:       https://termux.dev/docs
-Donate:     https://termux.dev/donate
-Community:  https://termux.dev/community
-
-Working with packages:
-
- - Search:  pkg search <query>
- - Install: pkg install <package>
- - Upgrade: pkg upgrade
-
-Subscribing to additional repositories:
-
- - Root:    pkg install root-repo
- - X11:     pkg install x11-repo
-
-For fixing any repository issues,
-try 'termux-change-repo' command.
-
-Report issues at https://termux.dev/issues
-"""
 
     CSS = """
     Screen {
@@ -83,78 +58,69 @@ Report issues at https://termux.dev/issues
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
                 yield Button("LISTAR JANELAS", id="windows", classes="btn")
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
-                yield Input(placeholder="Digite o texto para substituir...", id="custom_text")
-                yield Button("SALVAR FRASE", id="save_phrase", classes="btn")
-                yield Button("RESTAURAR FRASE ORIGINAL", id="reset_phrase", classes="btn")
-                yield Button("ENCERRAR TODAS AS SESSÕES", id="kill_sessions", classes="btn")
+                yield Button("RESETAR CONFIG", id="reset", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
+                # Input com foco para alterar a frase
+                self.text_input = Input(placeholder="Digite a nova frase", id="text_input")
+                yield self.text_input
+                yield Button("ALTERAR FRASE", id="change_text", classes="btn")
+                # Mostrar a frase original abaixo do input
+                yield Static("Texto Original: Welcome to Termux!", id="original_text")
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
+        """Abre novo terminal"""
         self.notify("Use Ctrl+C para voltar ao menu")
         self.query_one("#output", Static).update("Terminal ativo...")
 
     @on(Button.Pressed, "#update")
     def update_packages(self):
+        """Atualiza pacotes"""
         self.run_command("pkg update && pkg upgrade -y", "Sistema atualizado!")
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
-        self.query_one("#output", Static).update("")
-        if os.path.exists(self.CONFIG_FILE):
-            with open(self.CONFIG_FILE) as f:
-                frase = f.read()
+        """Limpa a tela e mostra a frase personalizada se alterada"""
+        custom_text = self.query_one("#text_input", Input).value
+        if custom_text:
+            self.query_one("#output", Static).update(custom_text)
         else:
-            frase = self.DEFAULT_MESSAGE
-        print(frase)
+            self.query_one("#output", Static).update("Texto original: Welcome to Termux!")
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
+        """Lista janelas abertas"""
         self.run_command("termux-window -l", "Janelas listadas")
 
     @on(Button.Pressed, "#config")
     def edit_config(self):
-        self.run_command(f"nano {self.CONFIG_FILE}", "Editando config...")
+        """Edita configuração"""
+        self.run_command("nano ~/.termux/termux.properties", "Editando config...")
 
-    @on(Button.Pressed, "#save_phrase")
-    def save_phrase(self):
-        input_text = self.query_one("#custom_text", Input).value
-        if input_text.strip():
-            os.makedirs(os.path.dirname(self.CONFIG_FILE), exist_ok=True)
-            with open(self.CONFIG_FILE, "w") as f:
-                f.write(input_text.strip())
-            self.query_one("#output", Static).update("Frase personalizada salva!")
+    @on(Button.Pressed, "#reset")
+    def reset_config(self):
+        """Resetar configuração e limpar cache"""
+        self.query_one("#text_input", Input).value = ""  # Limpar o texto do input
+        self.query_one("#output", Static).update("Texto original: Welcome to Termux!")
+        self.query_one("#original_text", Static).update("Texto Original: Welcome to Termux!")
+        self.notify("Configuração resetada!")
 
-    @on(Button.Pressed, "#reset_phrase")
-    def reset_phrase(self):
-        os.makedirs(os.path.dirname(self.CONFIG_FILE), exist_ok=True)
-        with open(self.CONFIG_FILE, "w") as f:
-            f.write(self.DEFAULT_MESSAGE)
-        self.query_one("#output", Static).update("Frase restaurada para o padrão.")
-
-    @on(Button.Pressed, "#kill_sessions")
-    def kill_sessions(self):
-        try:
-            output = subprocess.check_output("ps aux | grep bash", shell=True, text=True)
-            lines = output.splitlines()
-            killed = 0
-            for line in lines:
-                if "/usr/bin/bash" in line:
-                    parts = line.split()
-                    pid = int(parts[1])
-                    if pid != os.getpid():  # não mata a própria sessão
-                        os.kill(pid, signal.SIGKILL)
-                        killed += 1
-            self.query_one("#output", Static).update(f"{killed} sessões encerradas.")
-        except Exception as e:
-            self.query_one("#output", Static).update(f"Erro ao encerrar sessões: {e}")
+    @on(Button.Pressed, "#change_text")
+    def change_text(self):
+        """Alterar a frase"""
+        new_text = self.query_one("#text_input", Input).value
+        self.query_one("#output", Static).update(new_text)
+        self.query_one("#original_text", Static).update(f"Texto Original: {new_text}")
+        self.query_one("#text_input", Input).value = ""  # Limpar o input após a alteração
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
+        """Sai do aplicativo"""
         self.exit()
 
     def run_command(self, command: str, success_msg: str = ""):
+        """Executa comandos no terminal"""
         try:
             result = subprocess.run(
                 command,
@@ -169,6 +135,7 @@ Report issues at https://termux.dev/issues
             self.query_one("#output", Static).update(f"Erro: {e.stderr or 'Falha ao executar'}")
         except Exception as e:
             self.query_one("#output", Static).update(f"Erro inesperado: {str(e)}")
+
 
 if __name__ == "__main__":
     TermuxProMenu().run()
