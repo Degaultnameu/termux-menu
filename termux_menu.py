@@ -118,8 +118,10 @@ class TermuxProMenu(App):
         """Altera a frase padrão"""
         input_text = self.query_one("#user_input", Input).value
         if input_text:
+            # Atualiza o texto exibido com o valor do Input
             self.query_one("#output", Static).update(input_text)
         else:
+            # Mensagem caso não haja texto para alterar
             self.query_one("#output", Static).update("Por favor, insira um texto válido para alterar.")
 
     def run_command(self, command: str, success_msg: str = ""):
