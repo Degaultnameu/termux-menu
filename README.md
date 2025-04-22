@@ -2,17 +2,20 @@
 
 ## 🔌 Pré-requisitos
 Verifique se você tem:
-- Termux atualizado
-- Armazenamento permitido
+- Termux atualizado  
+- Armazenamento permitido  
+
+---
 
 # 🚀 Instalação do Termux Menu
 
 ## 📌 Comando Principal
+
 ```bash
 curl -sL https://raw.githubusercontent.com/Degaultnameu/termux-menu/main/install.sh | bash
+```
 
-
-
+---
 
 # termux-menu
 
@@ -70,3 +73,4 @@ Testado em:
 4. **Lista organizada de recursos**  
 5. **Estrutura de arquivos explicada**  
 6. **Compatibilidade declarada**
+   
