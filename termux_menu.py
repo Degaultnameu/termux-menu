@@ -58,22 +58,9 @@ class TermuxProMenu(App):
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
                 yield Button("LISTAR JANELAS", id="windows", classes="btn")
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
-                yield Button("RESETAR CONFIG", id="reset", classes="btn")
-                yield Button("FECHAR TODAS SESSÕES", id="close_sessions", classes="btn")
+                yield Button("FECHAR TODAS AS SESSÕES", id="close_sessions", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
-                
-                # Input com foco para alterar a frase
-                self.text_input = Input(placeholder="Digite a nova frase", id="text_input")
-                yield self.text_input
-                yield Button("ALTERAR FRASE", id="change_text", classes="btn")
-                yield Static("Texto Original: Welcome to Termux!", id="original_text")
-
-                # Botão para dar o Enter
-                yield Button("Simular ENTER", id="enter_button", classes="btn", disabled=True)
-
-                # Garantir foco no Input
-                self.text_input.focus()
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -90,8 +77,6 @@ class TermuxProMenu(App):
     def clear_screen(self):
         """Limpa a tela"""
         self.query_one("#output", Static).update("")
-        # Resetar a mensagem personalizada
-        self.query_one("#original_text", Static).update("Texto Original: Welcome to Termux!")
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
@@ -103,23 +88,47 @@ class TermuxProMenu(App):
         """Edita configuração"""
         self.run_command("nano ~/.termux/termux.properties", "Editando config...")
 
-    @on(Button.Pressed, "#reset")
-    def reset_config(self):
-        """Reseta a configuração"""
-        self.run_command("rm ~/.termux/termux.properties", "Configuração resetada!")
-
     @on(Button.Pressed, "#close_sessions")
     def close_sessions(self):
-        """Fecha todas as sessões"""
-        self.query_one("#output", Static).update("Por favor, pressione Enter para fechar todas as sessões.")
-        self.query_one("#enter_button", Button).disabled = False  # Habilita o botão de "Enter"
-    
+        """Fecha todas as sessões ativas"""
+        self.query_one("#output", Static).update("Por favor, pressione 'Enter' para confirmar...")
+
+        # Adiciona o botão "Enter" para confirmar o fechamento
+        self.query_one("#enter_button", Button).update("Pressione Enter para continuar")
+
     @on(Button.Pressed, "#enter_button")
     def press_enter(self):
-        """Simula pressionamento de Enter"""
-        self.run_command("exit", "Sessões encerradas!")
-        self.query_one("#output", Static).update("Todas as sessões foram fechadas.")
-        self.query_one("#enter_button", Button).disabled = True  # Desabilita o botão após o uso
+        """Pressiona enter para encerrar as sessões"""
+        # Encontrar os PIDs das sessões ativas
+        pids = self.get_active_sessions()
+        for pid in pids:
+            self.kill_process(pid)
+
+        # Após matar as sessões
+        self.query_one("#output", Static).update(f"Sessões fechadas: {', '.join(pids)}")
+
+    def get_active_sessions(self):
+        """Obtém os PIDs das sessões ativas no Termux"""
+        try:
+            result = subprocess.run(
+                "ps aux | grep 'bash' | awk '{print $2}'",
+                shell=True,
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            pids = result.stdout.splitlines()
+            return pids
+        except subprocess.CalledProcessError as e:
+            self.query_one("#output", Static).update(f"Erro ao obter PIDs: {e.stderr}")
+            return []
+
+    def kill_process(self, pid):
+        """Mata o processo com o PID fornecido"""
+        try:
+            subprocess.run(f"kill {pid}", shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            self.query_one("#output", Static).update(f"Erro ao matar o processo {pid}: {e.stderr}")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
@@ -145,4 +154,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-                
+    
