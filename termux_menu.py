@@ -1,31 +1,10 @@
 #!/usr/bin/env python3
 from textual.app import App, ComposeResult
-from textual.widgets import Button, Static, Input, ScrollView
-from textual.containers import Center, Vertical
+from textual.widgets import Button, Static, Input
+from textual.containers import Center, VerticalScroll, Vertical
 from textual import on
 import subprocess
-
-FRASE_ORIGINAL = """Welcome to Termux!
-
-Docs:       https://termux.dev/docs
-Donate:     https://termux.dev/donate
-Community:  https://termux.dev/community
-
-Working with packages:
-
- - Search:  pkg search <query>
- - Install: pkg install <package>
- - Upgrade: pkg upgrade
-
-Subscribing to additional repositories:
-
- - Root:    pkg install root-repo
- - X11:     pkg install x11-repo
-
-For fixing any repository issues,
-try 'termux-change-repo' command.
-
-Report issues at https://termux.dev/issues"""
+import os
 
 class TermuxProMenu(App):
     """Menu Termux Premium com Funções Reais"""
@@ -52,9 +31,10 @@ class TermuxProMenu(App):
 
     #output {
         margin-top: 2;
-        min-height: 6;
+        min-height: 4;
         border: solid #333;
         padding: 1;
+        color: white;
     }
 
     .btn {
@@ -69,17 +49,39 @@ class TermuxProMenu(App):
         background: #333;
     }
 
-    #user_input {
-        height: 3;
-        margin: 1 0;
+    Input {
+        background: #333;
+        color: white;
+        border: solid #555;
     }
     """
 
-    frase_atual = FRASE_ORIGINAL
+    frase_padrao = """Welcome to Termux!
+
+Docs:       https://termux.dev/docs
+Donate:     https://termux.dev/donate
+Community:  https://termux.dev/community
+
+Working with packages:
+
+ - Search:  pkg search <query>
+ - Install: pkg install <package>
+ - Upgrade: pkg upgrade
+
+Subscribing to additional repositories:
+
+ - Root:    pkg install root-repo
+ - X11:     pkg install x11-repo
+
+For fixing any repository issues,
+try 'termux-change-repo' command.
+
+Report issues at https://termux.dev/issues
+"""
 
     def compose(self) -> ComposeResult:
         with Center():
-            with ScrollView(id="main"):
+            with VerticalScroll(id="main"):
                 with Vertical():
                     yield Static("RUSC521 TERMINAL", id="title")
                     yield Button("TERMINAL", id="terminal", classes="btn")
@@ -90,17 +92,17 @@ class TermuxProMenu(App):
                     yield Button("SAIR", id="exit", classes="btn")
                     yield Static("", id="output")
                     yield Input(placeholder="Digite algo...", id="user_input")
+                    yield Button("ENCERRAR TODAS SESSÕES", id="enter_button", classes="btn")
                     yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
-                    yield Button("RESTAURAR FRASE ORIGINAL", id="reset_phrase", classes="btn")
-                    yield Button("ENCERRAR TODAS SESSÕES", id="close_sessions", classes="btn")
-                    yield Button("ENTER", id="enter_button", classes="btn")
 
     def on_mount(self):
-        self.query_one("#output", Static).update(self.frase_atual)
-        self.query_one("#enter_button", Button).display = False
+        self.query_one("#output", Static).update(self.frase_padrao)
+        self.query_one("#enter_button", Button).show()
+        self.query_one("#user_input", Input).focus()  # Mostra o teclado ao iniciar
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
+        self.notify("Use Ctrl+C para voltar ao menu")
         self.query_one("#output", Static).update("Terminal ativo...")
 
     @on(Button.Pressed, "#update")
@@ -109,7 +111,7 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
-        self.query_one("#output", Static).update(self.frase_atual)
+        self.query_one("#output", Static).update(self.frase_padrao)
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
@@ -123,30 +125,20 @@ class TermuxProMenu(App):
     def exit_app(self):
         self.exit()
 
-    @on(Button.Pressed, "#alter_phrase")
-    def alter_phrase(self):
-        input_text = self.query_one("#user_input", Input).value.strip()
-        if input_text:
-            self.frase_atual = input_text
-            self.query_one("#output", Static).update(self.frase_atual)
-        else:
-            self.query_one("#output", Static).update("Digite um texto válido.")
-
-    @on(Button.Pressed, "#reset_phrase")
-    def reset_phrase(self):
-        self.frase_atual = FRASE_ORIGINAL
-        self.query_one("#output", Static).update(self.frase_atual)
-
-    @on(Button.Pressed, "#close_sessions")
-    def close_sessions(self):
-        self.query_one("#output", Static).update("Encerrando sessões...\nAguarde e clique em ENTER para confirmar.")
-        self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Sessões encerradas.")
-        self.query_one("#enter_button", Button).display = True
-
     @on(Button.Pressed, "#enter_button")
     def press_enter(self):
-        self.query_one("#output", Static).update("Processo finalizado.")
-        self.query_one("#enter_button", Button).display = False
+        self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
+        self.query_one("#output", Static).update("Sessões encerradas automaticamente.")
+        self.query_one("#user_input", Input).focus()
+
+    @on(Button.Pressed, "#alter_phrase")
+    def alter_phrase(self):
+        input_text = self.query_one("#user_input", Input).value
+        if input_text:
+            self.frase_padrao = input_text
+            self.query_one("#output", Static).update(self.frase_padrao)
+        else:
+            self.query_one("#output", Static).update("Digite um texto válido para alterar a mensagem inicial.")
 
     def run_command(self, command: str, success_msg: str = ""):
         try:
@@ -166,4 +158,3 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
- 
