@@ -60,12 +60,8 @@ class TermuxProMenu(App):
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
-                
-                # Alterado: Usamos Input normal, sem 'visible' diretamente
-                self.config_input = Input(placeholder="Digite o novo conteúdo da config...", id="config_input")
-                self.save_button = Button("SALVAR CONFIG", id="save_config", classes="btn")
-                yield self.config_input
-                yield self.save_button
+                # Adicionando o campo de entrada para editar a mensagem
+                yield Input(id="new_message", placeholder="Digite a nova mensagem de boas-vindas...")
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -90,34 +86,28 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#config")
     def edit_config(self):
-        """Exibe campo para editar configuração"""
-        # Tornar visível o campo de entrada e botão de salvar
-        self.config_input.styles.visibility = "visible"
-        self.save_button.styles.visibility = "visible"
-        self.query_one("#output", Static).update("Digite o novo conteúdo e clique em SALVAR CONFIG.")
-
-    @on(Button.Pressed, "#save_config")
-    def save_config(self):
-        """Salva novo conteúdo no termux.properties"""
-        input_widget = self.query_one("#config_input", Input)
-        new_content = input_widget.value
-
-        try:
-            os.makedirs(os.path.expanduser("~/.termux"), exist_ok=True)
-            with open(os.path.expanduser("~/.termux/termux.properties"), "w") as f:
-                f.write(new_content)
-            self.query_one("#output", Static).update("Configuração salva com sucesso!")
-        except Exception as e:
-            self.query_one("#output", Static).update(f"Erro ao salvar: {str(e)}")
-
-        # Esconder os campos após salvar
-        self.config_input.styles.visibility = "hidden"
-        self.save_button.styles.visibility = "hidden"
+        """Edita a configuração de boas-vindas"""
+        new_message = self.query_one("#new_message", Input).value
+        if new_message:
+            # Salva a nova mensagem no arquivo motd
+            self.save_welcome_message(new_message)
+            self.query_one("#output", Static).update("Mensagem de boas-vindas atualizada com sucesso!")
+        else:
+            self.query_one("#output", Static).update("Por favor, insira uma nova mensagem.")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
         """Sai do aplicativo"""
         self.exit()
+
+    def save_welcome_message(self, message: str):
+        """Salva a nova mensagem no arquivo motd"""
+        try:
+            motd_file = "/data/data/com.termux/files/usr/etc/motd"
+            with open(motd_file, "w") as file:
+                file.write(message)
+        except Exception as e:
+            self.query_one("#output", Static).update(f"Erro ao salvar a mensagem: {str(e)}")
 
     def run_command(self, command: str, success_msg: str = ""):
         """Executa comandos no terminal"""
@@ -138,3 +128,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
+        
