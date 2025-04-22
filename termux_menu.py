@@ -6,6 +6,28 @@ from textual import on
 import subprocess
 import os
 
+FRASE_ORIGINAL = """Welcome to Termux!
+
+Docs:       https://termux.dev/docs
+Donate:     https://termux.dev/donate
+Community:  https://termux.dev/community
+
+Working with packages:
+
+ - Search:  pkg search <query>
+ - Install: pkg install <package>
+ - Upgrade: pkg upgrade
+
+Subscribing to additional repositories:
+
+ - Root:    pkg install root-repo
+ - X11:     pkg install x11-repo
+
+For fixing any repository issues,
+try 'termux-change-repo' command.
+
+Report issues at https://termux.dev/issues"""
+
 class TermuxProMenu(App):
     """Menu Termux Premium com Funções Reais"""
 
@@ -31,7 +53,7 @@ class TermuxProMenu(App):
 
     #output {
         margin-top: 2;
-        min-height: 4;
+        min-height: 6;
         border: solid #333;
         padding: 1;
     }
@@ -47,7 +69,14 @@ class TermuxProMenu(App):
     .btn:hover {
         background: #333;
     }
+
+    #user_input {
+        height: 3;
+        margin: 1 0;
+    }
     """
+
+    frase_atual = FRASE_ORIGINAL
 
     def compose(self) -> ComposeResult:
         with Center():
@@ -61,13 +90,17 @@ class TermuxProMenu(App):
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
                 yield Input(placeholder="Digite algo...", id="user_input")
-                yield Button("ENCERRAR TODAS SESSÕES", id="enter_button", classes="btn")
                 yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
-                yield Button("SALVAR COMO MOTD", id="save_motd", classes="btn")
+                yield Button("RESTAURAR FRASE ORIGINAL", id="reset_phrase", classes="btn")
+                yield Button("ENCERRAR TODAS SESSÕES", id="close_sessions", classes="btn")
+                yield Button("ENTER", id="enter_button", classes="btn")
+
+    def on_mount(self):
+        self.query_one("#output", Static).update(self.frase_atual)
+        self.query_one("#enter_button", Button).display = False
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
-        self.notify("Use Ctrl+C para voltar ao menu")
         self.query_one("#output", Static).update("Terminal ativo...")
 
     @on(Button.Pressed, "#update")
@@ -76,12 +109,7 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
-        self.query_one("#output", Static).update(
-            "Welcome to Termux!\nDocs: https://termux.dev/docs\nDonate: https://termux.dev/donate\nCommunity: https://termux.dev/community\n\n"
-            "Working with packages:\n - Search:  pkg search <query>\n - Install: pkg install <package>\n - Upgrade: pkg upgrade\n\n"
-            "Subscribing to additional repositories:\n - Root: pkg install root-repo\n - X11: pkg install x11-repo\n\n"
-            "For fixing any repository issues, try 'termux-change-repo' command.\n\nReport issues at https://termux.dev/issues"
-        )
+        self.query_one("#output", Static).update(self.frase_atual)
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
@@ -95,37 +123,30 @@ class TermuxProMenu(App):
     def exit_app(self):
         self.exit()
 
-    @on(Button.Pressed, "#enter_button")
-    def press_enter(self):
-        self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
-        self.query_one("#output", Static).update("Todas as sessões foram fechadas. Pressione 'Enter' para continuar.")
-
     @on(Button.Pressed, "#alter_phrase")
     def alter_phrase(self):
-        input_text = self.query_one("#user_input", Input).value
+        input_text = self.query_one("#user_input", Input).value.strip()
         if input_text:
-            self.query_one("#output", Static).update(input_text)
+            self.frase_atual = input_text
+            self.query_one("#output", Static).update(self.frase_atual)
         else:
-            self.query_one("#output", Static).update("Por favor, insira um texto válido para alterar.")
+            self.query_one("#output", Static).update("Digite um texto válido.")
 
-    @on(Button.Pressed, "#save_motd")
-    def save_motd(self):
-        text = self.query_one("#user_input", Input).value
-        if text:
-            os.makedirs(os.path.expanduser("~/.termux"), exist_ok=True)
-            motd_path = os.path.expanduser("~/.termux/motd")
-            with open(motd_path, "w") as f:
-                f.write(text + "\n")
+    @on(Button.Pressed, "#reset_phrase")
+    def reset_phrase(self):
+        self.frase_atual = FRASE_ORIGINAL
+        self.query_one("#output", Static).update(self.frase_atual)
 
-            # Garante que o Termux mostre o motd
-            properties_path = os.path.expanduser("~/.termux/termux.properties")
-            with open(properties_path, "w") as prop:
-                prop.write("hide-motd=false\n")
+    @on(Button.Pressed, "#close_sessions")
+    def close_sessions(self):
+        self.query_one("#output", Static).update("Encerrando sessões...\nAguarde e clique em ENTER para confirmar.")
+        self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Sessões encerradas.")
+        self.query_one("#enter_button", Button).display = True
 
-            subprocess.run("termux-reload-settings", shell=True)
-            self.query_one("#output", Static).update("MOTD salvo com sucesso!")
-        else:
-            self.query_one("#output", Static).update("Digite algo para salvar como MOTD.")
+    @on(Button.Pressed, "#enter_button")
+    def press_enter(self):
+        self.query_one("#output", Static).update("Processo finalizado.")
+        self.query_one("#enter_button", Button).display = False
 
     def run_command(self, command: str, success_msg: str = ""):
         try:
@@ -145,4 +166,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-    
+                
