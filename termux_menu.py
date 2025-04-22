@@ -59,14 +59,22 @@ class TermuxProMenu(App):
                 yield Button("LISTAR JANELAS", id="windows", classes="btn")
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
                 yield Button("RESETAR CONFIG", id="reset", classes="btn")
+                yield Button("FECHAR TODAS SESSÕES", id="close_sessions", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
+                
                 # Input com foco para alterar a frase
                 self.text_input = Input(placeholder="Digite a nova frase", id="text_input")
                 yield self.text_input
                 yield Button("ALTERAR FRASE", id="change_text", classes="btn")
                 # Mostrar a frase original abaixo do input
                 yield Static("Texto Original: Welcome to Termux!", id="original_text")
+
+                # Botão para dar o Enter
+                yield Button("Simular ENTER", id="enter_button", classes="btn")
+
+                # Garantir foco no Input
+                self.text_input.focus()
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -81,12 +89,10 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
-        """Limpa a tela e mostra a frase personalizada se alterada"""
-        custom_text = self.query_one("#text_input", Input).value
-        if custom_text:
-            self.query_one("#output", Static).update(custom_text)
-        else:
-            self.query_one("#output", Static).update("Texto original: Welcome to Termux!")
+        """Limpa a tela"""
+        self.query_one("#output", Static).update("")
+        # Resetar a mensagem personalizada
+        self.query_one("#original_text", Static).update("Texto Original: Welcome to Termux!")
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
@@ -100,19 +106,20 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#reset")
     def reset_config(self):
-        """Resetar configuração e limpar cache"""
-        self.query_one("#text_input", Input).value = ""  # Limpar o texto do input
-        self.query_one("#output", Static).update("Texto original: Welcome to Termux!")
-        self.query_one("#original_text", Static).update("Texto Original: Welcome to Termux!")
-        self.notify("Configuração resetada!")
+        """Reseta a configuração"""
+        self.run_command("rm ~/.termux/termux.properties", "Configuração resetada!")
 
-    @on(Button.Pressed, "#change_text")
-    def change_text(self):
-        """Alterar a frase"""
-        new_text = self.query_one("#text_input", Input).value
-        self.query_one("#output", Static).update(new_text)
-        self.query_one("#original_text", Static).update(f"Texto Original: {new_text}")
-        self.query_one("#text_input", Input).value = ""  # Limpar o input após a alteração
+    @on(Button.Pressed, "#close_sessions")
+    def close_sessions(self):
+        """Fecha todas as sessões"""
+        self.query_one("#output", Static).update("Por favor, pressione Enter para fechar todas as sessões.")
+        self.query_one("#enter_button", Button).update("Pressione Enter")
+    
+    @on(Button.Pressed, "#enter_button")
+    def press_enter(self):
+        """Simula pressionamento de Enter"""
+        self.run_command("exit", "Sessões encerradas!")
+        self.query_one("#output", Static).update("Todas as sessões foram fechadas.")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
@@ -136,6 +143,6 @@ class TermuxProMenu(App):
         except Exception as e:
             self.query_one("#output", Static).update(f"Erro inesperado: {str(e)}")
 
-
 if __name__ == "__main__":
     TermuxProMenu().run()
+    
