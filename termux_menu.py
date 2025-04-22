@@ -142,3 +142,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
+    
