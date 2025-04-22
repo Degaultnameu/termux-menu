@@ -158,3 +158,4 @@ Report issues at https://termux.dev/issues
 
 if __name__ == "__main__":
     TermuxProMenu().run()
+    
