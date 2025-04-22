@@ -18,3 +18,53 @@
 ```bash
 git clone https://github.com/Degaultnameu/termux-menu.git
 cd termux-menu
+pkg install python -y
+pip install textual
+
+2. Instale as dependências:
+
+bash
+pkg install python -y
+pip install textual
+Execute:
+
+bash
+python3 termux_menu.py
+⚙️ Configuração Avançada
+Para iniciar automaticamente ao abrir o Termux, edite seu .bashrc:
+
+echo -e '\n# Auto-start Termux Menu\nif [ -n "$PS1" ]; then\n    python3 ~/termux-menu/termux_menu.py || true\nfi' >> ~/.bashrc
+source ~/.bashrc
+
+
+
+🎨 Screenshot
+Menu Preview
+
+🤝 Contribuição
+Contribuições são bem-vindas! Siga estes passos:
+
+Faça um Fork
+
+Crie sua branch (git checkout -b feature/incrivel)
+
+Commit suas mudanças (git commit -m 'Adiciona feature incrível')
+
+Push para a branch (git push origin feature/incrivel)
+
+Abra um Pull Request
+
+📜 Licença
+
+
+### 🔍 Destaques:
+1. **Badges profissionais** - Mostra as tecnologias usadas
+2. **Emojis organizados** - Melhora a visualização
+3. **Seções claras** - Instalação básica vs avançada
+4. **Chamada para contribuição** - Padrão GitHub
+5. **Espaço para screenshot** - Basta substituir o placeholder
+
+### 💡 Dica extra:
+Adicione um arquivo `screenshot.png` real do seu menu no projeto e atualize o link no README para ficar ainda mais profissional!
+
+Quer que eu ajuste algo específico na descrição? 😊
