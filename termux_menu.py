@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
 from textual.app import App, ComposeResult
 from textual.widgets import Button, Static, Input
-from textual.containers import ScrollableContainer, Vertical, VerticalScroll
+from textual.containers import ScrollableContainer, Vertical
 from textual import on
 import subprocess
-import os
 
 class TermuxProMenu(App):
-    """Menu Termux Premium com Funções Reais"""
+    """Menu Termux Premium com Scroll Suave"""
 
     CSS = """
     Screen {
         align: center middle;
         background: #121212;
+        overflow: hidden;
     }
 
-    #main {
+    #scroll_container {
         width: 80%;
         height: 90%;
         border: double #333;
-        padding: 2;
         background: #1e1e1e;
-        overflow-y: auto;
+        scrollbar-color: #555 #1e1e1e;
     }
 
     #title {
@@ -32,7 +31,7 @@ class TermuxProMenu(App):
     }
 
     #output {
-        margin-top: 2;
+        margin: 2 0;
         min-height: 4;
         border: solid #333;
         padding: 1;
@@ -55,10 +54,11 @@ class TermuxProMenu(App):
         background: #333;
         color: white;
         border: solid #555;
+        margin-bottom: 1;
     }
 
     #enter_button {
-        display: none;
+        display: none;  /* Oculta o botão inicialmente */
     }
     """
 
@@ -73,22 +73,12 @@ Working with packages:
  - Search:  pkg search <query>
  - Install: pkg install <package>
  - Upgrade: pkg upgrade
-
-Subscribing to additional repositories:
-
- - Root:    pkg install root-repo
- - X11:     pkg install x11-repo
-
-For fixing any repository issues,
-try 'termux-change-repo' command.
-
-Report issues at https://termux.dev/issues
 """
 
     def compose(self) -> ComposeResult:
-        with ScrollableContainer(id="main"):
+        with ScrollableContainer(id="scroll_container"):
             with Vertical():
-                yield Static("RUSC521 TERMINAL", id="title")
+                yield Static("TERMUX PRO MENU", id="title")
                 yield Button("TERMINAL", id="terminal", classes="btn")
                 yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
@@ -105,62 +95,37 @@ Report issues at https://termux.dev/issues
         self.query_one("#user_input", Input).focus()
 
     @on(Button.Pressed, "#terminal")
-    def open_terminal(self):
-        self.notify("Use Ctrl+C para voltar ao menu")
-        self.query_one("#output", Static).update("Terminal ativo...")
-        self.query_one("#enter_button").styles.display = "block"
+    def terminal_pressed(self):
+        self.query_one("#enter_button").styles.display = "block"  # Mostra o botão
+        self.query_one("#output", Static).update("Terminal ativo. Pressione o botão abaixo para encerrar sessões.")
+
+    @on(Button.Pressed, "#enter_button")
+    def kill_sessions(self):
+        self.run_command("pkill -9 bash", "Todas as sessões bash foram encerradas!")
+        self.query_one("#enter_button").styles.display = "none"  # Oculta novamente
 
     @on(Button.Pressed, "#update")
     def update_packages(self):
-        self.run_command("pkg update && pkg upgrade -y", "Sistema atualizado!")
+        self.run_command("pkg update && pkg upgrade -y", "Pacotes atualizados!")
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
         self.query_one("#output", Static).update(self.frase_padrao)
 
-    @on(Button.Pressed, "#windows")
-    def list_windows(self):
-        self.run_command("termux-window -l", "Janelas listadas")
-
-    @on(Button.Pressed, "#config")
-    def edit_config(self):
-        self.run_command("nano ~/.termux/termux.properties", "Editando config...")
-
-    @on(Button.Pressed, "#exit")
-    def exit_app(self):
-        self.exit()
-
-    @on(Button.Pressed, "#enter_button")
-    def press_enter(self):
-        self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
-        self.query_one("#output", Static).update("Sessões encerradas automaticamente.")
-        self.query_one("#enter_button").styles.display = "none"
-        self.query_one("#user_input", Input).focus()
-
     @on(Button.Pressed, "#alter_phrase")
-    def alter_phrase(self):
-        input_text = self.query_one("#user_input", Input).value
-        if input_text:
-            self.frase_padrao = input_text
-            self.query_one("#output", Static).update(self.frase_padrao)
-        else:
-            self.query_one("#output", Static).update("Digite um texto válido para alterar a mensagem inicial.")
+    def change_phrase(self):
+        new_text = self.query_one("#user_input", Input).value
+        if new_text:
+            self.frase_padrao = new_text
+            self.query_one("#output", Static).update(new_text)
 
-    def run_command(self, command: str, success_msg: str = ""):
+    def run_command(self, command, success_msg):
         try:
-            result = subprocess.run(
-                command,
-                shell=True,
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            output = result.stdout or success_msg
+            result = subprocess.run(command, shell=True, capture_output=True, text=True)
+            output = result.stdout if result.stdout else success_msg
             self.query_one("#output", Static).update(output)
-        except subprocess.CalledProcessError as e:
-            self.query_one("#output", Static).update(f"Erro: {e.stderr or 'Falha ao executar'}")
         except Exception as e:
-            self.query_one("#output", Static).update(f"Erro inesperado: {str(e)}")
+            self.query_one("#output", Static).update(f"Erro: {str(e)}")
 
 if __name__ == "__main__":
     TermuxProMenu().run()
