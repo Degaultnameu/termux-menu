@@ -11,17 +11,6 @@ Execute este comando único:
 ```bash
 curl -sL https://raw.githubusercontent.com/Degaultnameu/termux-menu/main/install.sh | bash
 
-🛠️ Instalação Manual
-
-git clone https://github.com/Degaultnameu/termux-menu.git ~/termux-menu
-
-cd ~/termux-menu
-
-chmod +x install.sh
-
-./install.sh
-
-exit
 
 🚑 Solução de Problemas
 Se a pasta já existir:
