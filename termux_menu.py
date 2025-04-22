@@ -68,9 +68,7 @@ class TermuxProMenu(App):
         display: none;
     }
 
-    .btn:focus {
-        outline: 2px solid #00ff9d;
-    }
+    
     """
 
     frase_padrao = """█▓▒░ TERMUX PRO MENU ░▒▓█
