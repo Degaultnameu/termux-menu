@@ -63,69 +63,71 @@ class TermuxProMenu(App):
                 yield Input(placeholder="Digite algo...", id="user_input")
                 yield Button("ENCERRAR TODAS SESSÕES", id="enter_button", classes="btn")
                 yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
+                yield Button("SALVAR COMO MOTD", id="save_motd", classes="btn")
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
-        """Abre novo terminal"""
         self.notify("Use Ctrl+C para voltar ao menu")
         self.query_one("#output", Static).update("Terminal ativo...")
 
     @on(Button.Pressed, "#update")
     def update_packages(self):
-        """Atualiza pacotes"""
         self.run_command("pkg update && pkg upgrade -y", "Sistema atualizado!")
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
-        """Limpa a tela e exibe a mensagem padrão"""
-        self.query_one("#output", Static).update("Welcome to Termux!\nDocs: https://termux.dev/docs\nDonate: https://termux.dev/donate\nCommunity: https://termux.dev/community\n\nWorking with packages:\n - Search:  pkg search <query>\n - Install: pkg install <package>\n - Upgrade: pkg upgrade\n\nSubscribing to additional repositories:\n - Root: pkg install root-repo\n - X11: pkg install x11-repo\n\nFor fixing any repository issues, try 'termux-change-repo' command.\n\nReport issues at https://termux.dev/issues")
+        self.query_one("#output", Static).update(
+            "Welcome to Termux!\nDocs: https://termux.dev/docs\nDonate: https://termux.dev/donate\nCommunity: https://termux.dev/community\n\n"
+            "Working with packages:\n - Search:  pkg search <query>\n - Install: pkg install <package>\n - Upgrade: pkg upgrade\n\n"
+            "Subscribing to additional repositories:\n - Root: pkg install root-repo\n - X11: pkg install x11-repo\n\n"
+            "For fixing any repository issues, try 'termux-change-repo' command.\n\nReport issues at https://termux.dev/issues"
+        )
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
-        """Lista janelas abertas"""
         self.run_command("termux-window -l", "Janelas listadas")
 
     @on(Button.Pressed, "#config")
     def edit_config(self):
-        """Edita configuração"""
         self.run_command("nano ~/.termux/termux.properties", "Editando config...")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
-        """Sai do aplicativo"""
         self.exit()
-
-    @on(Button.Pressed, "#close_sessions")
-    def close_sessions(self):
-        """Fecha todas as sessões"""
-        self.query_one("#output", Static).update("Fechando todas as sessões... Pressione 'Enter' para continuar.")
-        self.query_one("#enter_button", Button).show()
 
     @on(Button.Pressed, "#enter_button")
     def press_enter(self):
-        """Simula pressionamento de 'Enter' para continuar o processo"""
-        # Fecha todas as sessões com o comando kill
         self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
-
-        # Atualiza o texto para indicar que as sessões foram fechadas
         self.query_one("#output", Static).update("Todas as sessões foram fechadas. Pressione 'Enter' para continuar.")
-
-        # Esconde o botão de "Enter" após a ação
-        self.query_one("#enter_button", Button).hide()
 
     @on(Button.Pressed, "#alter_phrase")
     def alter_phrase(self):
-        """Altera a frase padrão"""
         input_text = self.query_one("#user_input", Input).value
         if input_text:
-            # Atualiza o texto exibido com o valor do Input
             self.query_one("#output", Static).update(input_text)
         else:
-            # Mensagem caso não haja texto para alterar
             self.query_one("#output", Static).update("Por favor, insira um texto válido para alterar.")
 
+    @on(Button.Pressed, "#save_motd")
+    def save_motd(self):
+        text = self.query_one("#user_input", Input).value
+        if text:
+            os.makedirs(os.path.expanduser("~/.termux"), exist_ok=True)
+            motd_path = os.path.expanduser("~/.termux/motd")
+            with open(motd_path, "w") as f:
+                f.write(text + "\n")
+
+            # Garante que o Termux mostre o motd
+            properties_path = os.path.expanduser("~/.termux/termux.properties")
+            with open(properties_path, "w") as prop:
+                prop.write("hide-motd=false\n")
+
+            subprocess.run("termux-reload-settings", shell=True)
+            self.query_one("#output", Static).update("MOTD salvo com sucesso!")
+        else:
+            self.query_one("#output", Static).update("Digite algo para salvar como MOTD.")
+
     def run_command(self, command: str, success_msg: str = ""):
-        """Executa comandos no terminal"""
         try:
             result = subprocess.run(
                 command,
