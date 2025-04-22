@@ -52,7 +52,7 @@ class TermuxProMenu(App):
     def compose(self) -> ComposeResult:
         with Center():
             with Vertical(id="main"):
-                yield Static("RUSC52 TERMINAL", id="title")
+                yield Static("RUSC521 TERMINAL", id="title")
                 yield Button("TERMINAL", id="terminal", classes="btn")
                 yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
@@ -60,8 +60,12 @@ class TermuxProMenu(App):
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
-                yield Input(placeholder="Digite o novo conteúdo da config...", id="config_input", visible=False)
-                yield Button("SALVAR CONFIG", id="save_config", classes="btn", visible=False)
+                
+                # Alterado: Usamos Input normal, sem 'visible' diretamente
+                self.config_input = Input(placeholder="Digite o novo conteúdo da config...", id="config_input")
+                self.save_button = Button("SALVAR CONFIG", id="save_config", classes="btn")
+                yield self.config_input
+                yield self.save_button
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -87,8 +91,9 @@ class TermuxProMenu(App):
     @on(Button.Pressed, "#config")
     def edit_config(self):
         """Exibe campo para editar configuração"""
-        self.query_one("#config_input", Input).visible = True
-        self.query_one("#save_config", Button).visible = True
+        # Tornar visível o campo de entrada e botão de salvar
+        self.config_input.styles.visibility = "visible"
+        self.save_button.styles.visibility = "visible"
         self.query_one("#output", Static).update("Digite o novo conteúdo e clique em SALVAR CONFIG.")
 
     @on(Button.Pressed, "#save_config")
@@ -105,8 +110,9 @@ class TermuxProMenu(App):
         except Exception as e:
             self.query_one("#output", Static).update(f"Erro ao salvar: {str(e)}")
 
-        input_widget.visible = False
-        self.query_one("#save_config", Button).visible = False
+        # Esconder os campos após salvar
+        self.config_input.styles.visibility = "hidden"
+        self.save_button.styles.visibility = "hidden"
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
@@ -132,4 +138,3 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-    
