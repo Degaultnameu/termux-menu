@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from textual.app import App, ComposeResult
 from textual.widgets import Button, Static, Input
-from textual.containers import Center, VerticalScroll, Vertical
+from textual.containers import ScrollableContainer, Vertical, VerticalScroll
 from textual import on
 import subprocess
 import os
@@ -17,9 +17,11 @@ class TermuxProMenu(App):
 
     #main {
         width: 80%;
+        height: 90%;
         border: double #333;
         padding: 2;
         background: #1e1e1e;
+        overflow-y: auto;
     }
 
     #title {
@@ -54,6 +56,10 @@ class TermuxProMenu(App):
         color: white;
         border: solid #555;
     }
+
+    #enter_button {
+        display: none;
+    }
     """
 
     frase_padrao = """Welcome to Termux!
@@ -80,31 +86,29 @@ Report issues at https://termux.dev/issues
 """
 
     def compose(self) -> ComposeResult:
-        with Center():
-            with VerticalScroll(id="main"):
-                with Vertical():
-                    yield Static("RUSC521 TERMINAL", id="title")
-                    yield Button("TERMINAL", id="terminal", classes="btn")
-                    yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
-                    yield Button("LIMPAR TELA", id="clear", classes="btn")
-                    yield Button("LISTAR JANELAS", id="windows", classes="btn")
-                    yield Button("EDITAR CONFIG", id="config", classes="btn")
-                    yield Button("SAIR", id="exit", classes="btn")
-                    yield Static("", id="output")
-                    yield Input(placeholder="Digite algo...", id="user_input")
-                    yield Button("ENCERRAR TODAS SESSÕES", id="enter_button", classes="btn")
-                    yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
+        with ScrollableContainer(id="main"):
+            with Vertical():
+                yield Static("RUSC521 TERMINAL", id="title")
+                yield Button("TERMINAL", id="terminal", classes="btn")
+                yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
+                yield Button("LIMPAR TELA", id="clear", classes="btn")
+                yield Button("LISTAR JANELAS", id="windows", classes="btn")
+                yield Button("EDITAR CONFIG", id="config", classes="btn")
+                yield Button("SAIR", id="exit", classes="btn")
+                yield Static("", id="output")
+                yield Input(placeholder="Digite algo...", id="user_input")
+                yield Button("ENCERRAR TODAS SESSÕES", id="enter_button", classes="btn")
+                yield Button("ALTERAR FRASE", id="alter_phrase", classes="btn")
 
     def on_mount(self):
         self.query_one("#output", Static).update(self.frase_padrao)
-        # Ocultar o botão usando styles.display
-        self.query_one("#enter_button", Button).styles.display = "none"
-        self.query_one("#user_input", Input).focus()  # Foca o input automaticamente para mostrar o teclado
+        self.query_one("#user_input", Input).focus()
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
         self.notify("Use Ctrl+C para voltar ao menu")
         self.query_one("#output", Static).update("Terminal ativo...")
+        self.query_one("#enter_button").styles.display = "block"
 
     @on(Button.Pressed, "#update")
     def update_packages(self):
@@ -130,9 +134,8 @@ Report issues at https://termux.dev/issues
     def press_enter(self):
         self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
         self.query_one("#output", Static).update("Sessões encerradas automaticamente.")
-        # Ocultar o botão usando styles.display
-        self.query_one("#enter_button", Button).styles.display = "none"
-        self.query_one("#user_input", Input).focus()  # Garante que o teclado continue visível
+        self.query_one("#enter_button").styles.display = "none"
+        self.query_one("#user_input", Input).focus()
 
     @on(Button.Pressed, "#alter_phrase")
     def alter_phrase(self):
