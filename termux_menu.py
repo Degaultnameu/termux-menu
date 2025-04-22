@@ -5,10 +5,13 @@ from textual.containers import Center, Vertical
 from textual import on
 import subprocess
 import os
+import signal
 
-CONFIG_FILE = "/data/data/com.termux/files/home/.termuxmotd"
+class TermuxProMenu(App):
+    """Menu Termux Premium com Funções Reais"""
 
-TEXTO_PADRAO = """Welcome to Termux!
+    CONFIG_FILE = os.path.expanduser("~/.termux/welcome_message.txt")
+    DEFAULT_MESSAGE = """Welcome to Termux!
 
 Docs:       https://termux.dev/docs
 Donate:     https://termux.dev/donate
@@ -31,7 +34,6 @@ try 'termux-change-repo' command.
 Report issues at https://termux.dev/issues
 """
 
-class TermuxProMenu(App):
     CSS = """
     Screen {
         align: center middle;
@@ -57,7 +59,6 @@ class TermuxProMenu(App):
         min-height: 4;
         border: solid #333;
         padding: 1;
-        color: white;
     }
 
     .btn {
@@ -82,11 +83,11 @@ class TermuxProMenu(App):
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
                 yield Button("LISTAR JANELAS", id="windows", classes="btn")
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
-                yield Button("SALVAR CONFIG", id="salvar", classes="btn")
-                yield Button("RESET CONFIG", id="reset", classes="btn")
-                yield Button("DELETAR SESSÕES", id="deletar_sessoes", classes="btn")
+                yield Input(placeholder="Digite o texto para substituir...", id="custom_text")
+                yield Button("SALVAR FRASE", id="save_phrase", classes="btn")
+                yield Button("RESTAURAR FRASE ORIGINAL", id="reset_phrase", classes="btn")
+                yield Button("ENCERRAR TODAS AS SESSÕES", id="kill_sessions", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
-                yield Input(placeholder="Digite novo texto", id="edit_input")
                 yield Static("", id="output")
 
     @on(Button.Pressed, "#terminal")
@@ -100,7 +101,13 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#clear")
     def clear_screen(self):
-        self.query_one("#output", Static).update(self.get_motd())
+        self.query_one("#output", Static).update("")
+        if os.path.exists(self.CONFIG_FILE):
+            with open(self.CONFIG_FILE) as f:
+                frase = f.read()
+        else:
+            frase = self.DEFAULT_MESSAGE
+        print(frase)
 
     @on(Button.Pressed, "#windows")
     def list_windows(self):
@@ -108,31 +115,40 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#config")
     def edit_config(self):
-        self.query_one("#output", Static).update("Digite novo texto no campo abaixo e clique em SALVAR CONFIG.")
+        self.run_command(f"nano {self.CONFIG_FILE}", "Editando config...")
 
-    @on(Button.Pressed, "#salvar")
-    def salvar_config(self):
-        novo_texto = self.query_one("#edit_input", Input).value
-        if novo_texto.strip():
-            with open(CONFIG_FILE, "w") as f:
-                f.write(novo_texto)
-            self.query_one("#output", Static).update("Configuração salva!")
-        else:
-            self.query_one("#output", Static).update("Campo vazio. Nada foi salvo.")
+    @on(Button.Pressed, "#save_phrase")
+    def save_phrase(self):
+        input_text = self.query_one("#custom_text", Input).value
+        if input_text.strip():
+            os.makedirs(os.path.dirname(self.CONFIG_FILE), exist_ok=True)
+            with open(self.CONFIG_FILE, "w") as f:
+                f.write(input_text.strip())
+            self.query_one("#output", Static).update("Frase personalizada salva!")
 
-    @on(Button.Pressed, "#reset")
-    def reset_config(self):
-        with open(CONFIG_FILE, "w") as f:
-            f.write(TEXTO_PADRAO)
-        subprocess.run("rm -rf $PREFIX/var/cache/*", shell=True)
-        self.query_one("#output", Static).update("Configuração restaurada e cache limpo!")
+    @on(Button.Pressed, "#reset_phrase")
+    def reset_phrase(self):
+        os.makedirs(os.path.dirname(self.CONFIG_FILE), exist_ok=True)
+        with open(self.CONFIG_FILE, "w") as f:
+            f.write(self.DEFAULT_MESSAGE)
+        self.query_one("#output", Static).update("Frase restaurada para o padrão.")
 
-    @on(Button.Pressed, "#deletar_sessoes")
-    def deletar_sessoes(self):
-        bash_pids = subprocess.check_output("ps aux | grep bash | grep -v grep | awk '{print $2}'", shell=True, text=True).splitlines()
-        for pid in bash_pids:
-            subprocess.run(f"kill -9 {pid}", shell=True)
-        self.query_one("#output", Static).update(f"Sessões encerradas: {', '.join(bash_pids)}")
+    @on(Button.Pressed, "#kill_sessions")
+    def kill_sessions(self):
+        try:
+            output = subprocess.check_output("ps aux | grep bash", shell=True, text=True)
+            lines = output.splitlines()
+            killed = 0
+            for line in lines:
+                if "/usr/bin/bash" in line:
+                    parts = line.split()
+                    pid = int(parts[1])
+                    if pid != os.getpid():  # não mata a própria sessão
+                        os.kill(pid, signal.SIGKILL)
+                        killed += 1
+            self.query_one("#output", Static).update(f"{killed} sessões encerradas.")
+        except Exception as e:
+            self.query_one("#output", Static).update(f"Erro ao encerrar sessões: {e}")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
@@ -140,7 +156,13 @@ class TermuxProMenu(App):
 
     def run_command(self, command: str, success_msg: str = ""):
         try:
-            result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+            result = subprocess.run(
+                command,
+                shell=True,
+                check=True,
+                capture_output=True,
+                text=True
+            )
             output = result.stdout or success_msg
             self.query_one("#output", Static).update(output)
         except subprocess.CalledProcessError as e:
@@ -148,12 +170,5 @@ class TermuxProMenu(App):
         except Exception as e:
             self.query_one("#output", Static).update(f"Erro inesperado: {str(e)}")
 
-    def get_motd(self):
-        if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE) as f:
-                return f.read()
-        return TEXTO_PADRAO
-
 if __name__ == "__main__":
     TermuxProMenu().run()
-    
