@@ -97,8 +97,8 @@ Report issues at https://termux.dev/issues
 
     def on_mount(self):
         self.query_one("#output", Static).update(self.frase_padrao)
-        # Agora vamos garantir que o botão "Enter" esteja oculto inicialmente
-        self.query_one("#enter_button", Button).hide()
+        # Ocultar o botão usando styles.display
+        self.query_one("#enter_button", Button).styles.display = "none"
         self.query_one("#user_input", Input).focus()  # Foca o input automaticamente para mostrar o teclado
 
     @on(Button.Pressed, "#terminal")
@@ -130,7 +130,8 @@ Report issues at https://termux.dev/issues
     def press_enter(self):
         self.run_command("ps -ef | grep 'bash' | grep -v 'grep' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram fechadas!")
         self.query_one("#output", Static).update("Sessões encerradas automaticamente.")
-        self.query_one("#enter_button", Button).hide()  # Esconde o botão após a ação
+        # Ocultar o botão usando styles.display
+        self.query_one("#enter_button", Button).styles.display = "none"
         self.query_one("#user_input", Input).focus()  # Garante que o teclado continue visível
 
     @on(Button.Pressed, "#alter_phrase")
