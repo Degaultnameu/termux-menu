@@ -22,19 +22,21 @@ Menu interativo para Termux com design moderno, comandos rápidos e instalação
 
 ## ❗ Pré-requisitos
 
-### 🔄 - 🔄 **Se a pasta já existir:**
+### 🔄 **Se a pasta já existir:**
 
 ```bash
 rm -rf ~/termux-menu
 ```
 Depois, repita o processo de instalação.
 
-### 🔓 Se faltar permissões:
+### 🔓 **Se faltar permissões:**
+
 ```bash
 termux-setup-storage
 ```
 
-### 🔄 Atualizar pacotes:
+### 🔄 **Atualizar pacotes:**
+
 ```bash
 pkg update && pkg upgrade -y
 ```
