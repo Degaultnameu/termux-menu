@@ -52,7 +52,7 @@ class TermuxProMenu(App):
     def compose(self) -> ComposeResult:
         with Center():
             with Vertical(id="main"):
-                yield Static("RUSC521 TERMINAL", id="title")
+                yield Static("RUSC52 TERMINAL", id="title")
                 yield Button("TERMINAL", id="terminal", classes="btn")
                 yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
