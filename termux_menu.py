@@ -47,6 +47,22 @@ class TermuxProMenu(App):
     .btn:hover {
         background: #333;
     }
+
+    #enter_button {
+        width: 100%;
+        height: 3;
+        margin: 1 0;
+        background: #006400;
+        color: white;
+    }
+
+    #edit_button {
+        width: 100%;
+        height: 3;
+        margin: 1 0;
+        background: #800080;
+        color: white;
+    }
     """
 
     def compose(self) -> ComposeResult:
@@ -61,7 +77,10 @@ class TermuxProMenu(App):
                 yield Button("FECHAR TODAS AS SESSÕES", id="close_sessions", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
-
+                yield Input(placeholder="Digite a frase", id="edittext")
+                yield Button("Alterar Frase", id="edit_button", classes="btn")
+                yield Button("Pressione Enter para Confirmar", id="enter_button", classes="btn")
+    
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
         """Abre novo terminal"""
@@ -107,6 +126,12 @@ class TermuxProMenu(App):
         # Após matar as sessões
         self.query_one("#output", Static).update(f"Sessões fechadas: {', '.join(pids)}")
 
+    @on(Button.Pressed, "#edit_button")
+    def edit_text(self):
+        """Altera a frase"""
+        new_text = self.query_one("#edittext", Input).value
+        self.query_one("#output", Static).update(f"Texto Alterado: {new_text}")
+    
     def get_active_sessions(self):
         """Obtém os PIDs das sessões ativas no Termux"""
         try:
@@ -154,4 +179,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-    
+        
