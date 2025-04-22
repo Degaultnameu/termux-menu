@@ -49,30 +49,6 @@ class TermuxProMenu(App):
     }
     """
 
-    # Mensagem padrão do motd
-    DEFAULT_MOTD = """Welcome to Termux!
-
-Docs:       https://termux.dev/docs
-Donate:     https://termux.dev/donate
-Community:  https://termux.dev/community
-
-Working with packages:
-
- - Search:  pkg search <query>
- - Install: pkg install <package>
- - Upgrade: pkg upgrade
-
-Subscribing to additional repositories:
-
- - Root:    pkg install root-repo
- - X11:     pkg install x11-repo
-
-For fixing any repository issues,
-try 'termux-change-repo' command.
-
-Report issues at https://termux.dev/issues
-"""
-
     def compose(self) -> ComposeResult:
         with Center():
             with Vertical(id="main"):
@@ -82,15 +58,9 @@ Report issues at https://termux.dev/issues
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
                 yield Button("LISTAR JANELAS", id="windows", classes="btn")
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
+                yield Button("DELETAR TODAS AS SESSÕES", id="delete_all_sessions", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
-
-                # Adicionando o campo de entrada para editar a mensagem
-                yield Input(id="new_message", placeholder="Digite a nova mensagem de boas-vindas...")
-                # Adicionando o botão "Salvar Config"
-                yield Button("SALVAR CONFIG", id="save_config", classes="btn")
-                # Adicionando o botão "Reset"
-                yield Button("RESET", id="reset_config", classes="btn")
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -115,42 +85,18 @@ Report issues at https://termux.dev/issues
 
     @on(Button.Pressed, "#config")
     def edit_config(self):
-        """Edita a configuração de boas-vindas"""
-        self.query_one("#output", Static).update("Digite a nova mensagem de boas-vindas...")
+        """Edita configuração"""
+        self.run_command("nano ~/.termux/termux.properties", "Editando config...")
 
-    @on(Button.Pressed, "#save_config")
-    def save_config(self):
-        """Captura o texto do campo de entrada e salva no motd"""
-        new_message = self.query_one("#new_message", Input).value
-        if new_message:
-            # Salva a nova mensagem no arquivo motd
-            self.save_welcome_message(new_message)
-        else:
-            self.query_one("#output", Static).update("Por favor, insira uma nova mensagem.")
-
-    @on(Button.Pressed, "#reset_config")
-    def reset_config(self):
-        """Restaura a mensagem de boas-vindas padrão e limpa o campo de entrada"""
-        self.save_welcome_message(self.DEFAULT_MOTD)  # Restaurar o motd padrão
-        self.query_one("#new_message", Input).value = ""  # Limpa o campo de entrada
-        self.query_one("#output", Static).update("Mensagem de boas-vindas restaurada para o padrão!")
+    @on(Button.Pressed, "#delete_all_sessions")
+    def delete_all_sessions(self):
+        """Deleta todas as sessões do Termux"""
+        self.run_command("ps aux | grep '[b]ash' | awk '{print $2}' | xargs kill -9", "Todas as sessões foram encerradas!")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
         """Sai do aplicativo"""
         self.exit()
-
-    def save_welcome_message(self, message: str):
-        """Salva a nova mensagem no arquivo motd"""
-        try:
-            motd_file = "/data/data/com.termux/files/usr/etc/motd"
-            with open(motd_file, "w") as file:
-                file.write(message)
-            self.query_one("#output", Static).update("Mensagem de boas-vindas atualizada com sucesso!")
-        except PermissionError:
-            self.query_one("#output", Static).update("Erro: Permissão negada ao tentar modificar o motd.")
-        except Exception as e:
-            self.query_one("#output", Static).update(f"Erro ao salvar a mensagem: {str(e)}")
 
     def run_command(self, command: str, success_msg: str = ""):
         """Executa comandos no terminal"""
