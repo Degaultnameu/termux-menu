@@ -7,13 +7,12 @@ import subprocess
 import os
 
 class TermuxProMenu(App):
-    """Menu Termux Premium Completo com Scroll Funcional"""
+    """Menu Termux Premium Completo com Todas as Funções"""
 
     CSS = """
     Screen {
         align: center middle;
         background: #121212;
-        overflow: hidden;
     }
 
     #scrollable {
@@ -22,8 +21,7 @@ class TermuxProMenu(App):
         border: double #333;
         padding: 1;
         background: #1e1e1e;
-        overflow-y: scroll;
-        scrollbar-color: #555 #1e1e1e;
+        overflow-y: auto;
     }
 
     #title {
@@ -70,130 +68,140 @@ class TermuxProMenu(App):
         display: none;
     }
 
-    /* Efeitos especiais para os botões */
     .btn:focus {
         outline: 2px solid #00ff9d;
     }
-
-    /* Barra de scroll personalizada */
-    #scrollable::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    #scrollable::-webkit-scrollbar-thumb {
-        background-color: #555;
-        border-radius: 4px;
-    }
-
-    #scrollable::-webkit-scrollbar-track {
-        background-color: #1e1e1e;
-    }
     """
 
-    frase_padrao = """Welcome to Termux Premium!
+    frase_padrao = """█▓▒░ TERMUX PRO MENU ░▒▓█
 
-███╗   ██╗███████╗███╗   ███╗
-████╗  ██║██╔════╝████╗ ████║
-██╔██╗ ██║█████╗  ██╔████╔██║
-██║╚██╗██║██╔══╝  ██║╚██╔╝██║
-██║ ╚████║███████╗██║ ╚═╝ ██║
-╚═╝  ╚═══╝╚══════╝╚═╝     ╚═╝
+╔════════════════════════════╗
+║   COMANDOS PRINCIPAIS      ║
+╠════════════════════════════╣
+║ • pkg update && pkg upgrade║
+║ • termux-change-repo       ║
+║ • termux-setup-storage     ║
+║ • termux-window -l         ║
+╚════════════════════════════╝
 
+[!] Digite 'help' para assistência
 [+] Comunidade: termux.dev/community
-[+] Documentação: termux.dev/docs
-
-Comandos úteis:
-• pkg update && pkg upgrade
-• termux-change-repo
-• termux-setup-storage
 """
 
     def compose(self) -> ComposeResult:
         with ScrollableContainer(id="scrollable"):
             with Vertical():
-                yield Static("TERMUX PRO MENU", id="title")
-                yield Button("TERMINAL INTERATIVO", id="terminal", classes="btn")
-                yield Button("ATUALIZAR SISTEMA", id="update", classes="btn")
-                yield Button("LIMPAR TERMINAL", id="clear", classes="btn")
-                yield Button("GERENCIAR JANELAS", id="windows", classes="btn")
-                yield Button("EDITAR CONFIGURAÇÕES", id="config", classes="btn")
-                yield Button("INSTALAR FERRAMENTAS", id="tools", classes="btn")
-                yield Button("INFORMAÇÕES DO SISTEMA", id="sysinfo", classes="btn")
-                yield Button("REDE E CONECTIVIDADE", id="network", classes="btn")
-                yield Button("GERENCIAR PROCESSOS", id="process", classes="btn")
-                yield Button("SAIR DO APLICATIVO", id="exit", classes="btn")
+                yield Static("█▓▒░ TERMUX PRO ░▒▓█", id="title")
+                
+                # Seção de Controle do Sistema
+                yield Button("🔄 ATUALIZAR SISTEMA", id="update", classes="btn")
+                yield Button("🧹 LIMPAR TERMINAL", id="clear", classes="btn")
+                yield Button("💻 TERMINAL INTERATIVO", id="terminal", classes="btn")
+                
+                # Seção de Gerenciamento
+                yield Button("📊 LISTAR PROCESSOS", id="process", classes="btn")
+                yield Button("🖥️ GERENCIAR JANELAS", id="windows", classes="btn")
+                yield Button("⚙️ EDITAR CONFIGURAÇÕES", id="config", classes="btn")
+                
+                # Seção de Rede
+                yield Button("🌐 TESTAR CONEXÃO", id="network_test", classes="btn")
+                yield Button("📶 INFORMAÇÕES DE REDE", id="network_info", classes="btn")
+                
+                # Seção de Ferramentas
+                yield Button("🛠️ INSTALAR FERRAMENTAS", id="install_tools", classes="btn")
+                yield Button("💾 BACKUP CONFIG", id="backup", classes="btn")
+                yield Button("🔄 RESTAURAR PADRÕES", id="reset", classes="btn")
+                
+                # Seção Personalização
                 yield Static(self.frase_padrao, id="output")
-                yield Input(placeholder="Digite comandos ou mensagens...", id="user_input")
-                yield Button("FECHAR TODAS SESSÕES", id="enter_button", classes="btn")
-                yield Button("PERSONALIZAR MENSAGEM", id="alter_phrase", classes="btn")
-                yield Button("BACKUP CONFIGURAÇÕES", id="backup", classes="btn")
-                yield Button("RESTAURAR PADRÕES", id="reset", classes="btn")
+                yield Input(placeholder="Digite comandos aqui...", id="user_input")
+                yield Button("🔴 ENCERRAR TODAS SESSÕES", id="enter_button", classes="btn")
+                yield Button("🎨 PERSONALIZAR MENSAGEM", id="alter_phrase", classes="btn")
+                
+                # Seção Extra
+                yield Button("📋 COPIAR COMANDO", id="copy", classes="btn")
+                yield Button("📤 EXPORTAR CONFIG", id="export", classes="btn")
+                yield Button("❌ SAIR DO APLICATIVO", id="exit", classes="btn")
 
     def on_mount(self):
         self.query_one("#user_input", Input).focus()
         self.query_one("#output", Static).update(self.frase_padrao)
 
-    @on(Button.Pressed, "#terminal")
-    def terminal_pressed(self):
-        self.query_one("#enter_button").styles.display = "block"
-        self.notify("Modo terminal ativo", timeout=3)
-        self.query_one("#output", Static).update("""Terminal ativo!
-Digite comandos no campo acima.
-Pressione [FECHAR TODAS SESSÕES] para retornar.""")
-
-    @on(Button.Pressed, "#enter_button")
-    def kill_sessions(self):
-        self.run_command("pkill -9 bash", "Sessões encerradas!")
-        self.query_one("#enter_button").styles.display = "none"
-
+    # [1] Funções de Controle do Sistema
     @on(Button.Pressed, "#update")
     def update_system(self):
-        self.run_command("pkg update && pkg upgrade -y", "Sistema atualizado com sucesso!")
+        self.run_command("pkg update && pkg upgrade -y", "✅ Sistema atualizado com sucesso!")
 
     @on(Button.Pressed, "#clear")
     def clear_terminal(self):
         self.query_one("#output", Static).update(self.frase_padrao)
 
+    @on(Button.Pressed, "#terminal")
+    def terminal_pressed(self):
+        self.query_one("#enter_button").styles.display = "block"
+        self.notify("Terminal ativo - Digite seus comandos", timeout=3)
+        self.query_one("#output", Static).update("""TERMINAL ATIVO:
+Digite comandos no campo acima.
+Pressione [ENCERRAR SESSÕES] para retornar.""")
+
+    # [2] Funções de Gerenciamento
+    @on(Button.Pressed, "#process")
+    def show_processes(self):
+        self.run_command("ps aux", "📊 Processos em execução:")
+
     @on(Button.Pressed, "#windows")
     def list_windows(self):
-        self.run_command("termux-window -l", "Janelas disponíveis:")
+        self.run_command("termux-window -l", "🖥️ Janelas disponíveis:")
 
     @on(Button.Pressed, "#config")
     def edit_config(self):
-        self.run_command("nano $HOME/.termux/termux.properties", "Editando configurações...")
+        self.run_command("nano $HOME/.termux/termux.properties", "⚙️ Editando configurações...")
 
-    @on(Button.Pressed, "#tools")
+    # [3] Funções de Rede
+    @on(Button.Pressed, "#network_test")
+    def test_network(self):
+        self.run_command("ping -c 4 google.com", "🌐 Testando conexão com Google...")
+
+    @on(Button.Pressed, "#network_info")
+    def network_info(self):
+        self.run_command("ifconfig || ip a", "📶 Informações de rede:")
+
+    # [4] Funções de Ferramentas
+    @on(Button.Pressed, "#install_tools")
     def install_tools(self):
-        self.run_command("pkg install git python nmap", "Ferramentas básicas instaladas")
-
-    @on(Button.Pressed, "#sysinfo")
-    def system_info(self):
-        self.run_command("termux-info", "Informações do sistema:")
-
-    @on(Button.Pressed, "#network")
-    def network_tools(self):
-        self.run_command("ifconfig || ip a", "Configurações de rede:")
-
-    @on(Button.Pressed, "#process")
-    def show_processes(self):
-        self.run_command("ps aux", "Processos em execução:")
+        self.run_command("pkg install git python nmap", "🛠️ Ferramentas básicas instaladas")
 
     @on(Button.Pressed, "#backup")
     def backup_config(self):
         self.run_command("cp $HOME/.termux/termux.properties $HOME/termux_backup.properties", 
-                        "Backup criado em: $HOME/termux_backup.properties")
+                        "💾 Backup criado em: $HOME/termux_backup.properties")
 
     @on(Button.Pressed, "#reset")
     def reset_defaults(self):
-        self.run_command("termux-reset", "Configurações resetadas para padrão")
+        self.run_command("termux-reset", "🔄 Configurações resetadas para padrão")
 
+    # [5] Funções Personalização
     @on(Button.Pressed, "#alter_phrase")
     def change_welcome(self):
         new_msg = self.query_one("#user_input", Input).value
         if new_msg:
             self.frase_padrao = new_msg
             self.query_one("#output", Static).update(new_msg)
-            self.notify("Mensagem atualizada!", timeout=2)
+            self.notify("Mensagem personalizada salva!", timeout=2)
+
+    @on(Button.Pressed, "#enter_button")
+    def kill_sessions(self):
+        self.run_command("pkill -9 bash", "🔴 Todas as sessões foram encerradas!")
+        self.query_one("#enter_button").styles.display = "none"
+
+    # [6] Funções Extras
+    @on(Button.Pressed, "#copy")
+    def copy_command(self):
+        self.run_command("termux-clipboard-set < input.txt", "📋 Comando copiado para clipboard")
+
+    @on(Button.Pressed, "#export")
+    def export_config(self):
+        self.run_command("tar -czf termux_backup.tar.gz $HOME/.termux", "📤 Configurações exportadas")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
@@ -211,7 +219,7 @@ Pressione [FECHAR TODAS SESSÕES] para retornar.""")
             output = result.stdout if result.stdout else success_msg
             self.query_one("#output", Static).update(output)
         except Exception as e:
-            self.query_one("#output", Static).update(f"Erro: {str(e)}")
+            self.query_one("#output", Static).update(f"❌ Erro: {str(e)}")
 
 if __name__ == "__main__":
     app = TermuxProMenu()
