@@ -1,0 +1,9 @@
+# termux-menu/.bashrc_snippet
+# ===========================
+# Auto-start Termux Menu (only in interactive shells)
+if [ -n "$PS1" ]; then
+    python3 ~/termux-menu/termux_menu.py || true
+fi
+
+# Aliases
+alias turbo='python3 ~/termux-menu/termux_turbo.py'  # Opcional
