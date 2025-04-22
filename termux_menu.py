@@ -67,11 +67,10 @@ class TermuxProMenu(App):
                 self.text_input = Input(placeholder="Digite a nova frase", id="text_input")
                 yield self.text_input
                 yield Button("ALTERAR FRASE", id="change_text", classes="btn")
-                # Mostrar a frase original abaixo do input
                 yield Static("Texto Original: Welcome to Termux!", id="original_text")
 
                 # Botão para dar o Enter
-                yield Button("Simular ENTER", id="enter_button", classes="btn")
+                yield Button("Simular ENTER", id="enter_button", classes="btn", disabled=True)
 
                 # Garantir foco no Input
                 self.text_input.focus()
@@ -113,13 +112,14 @@ class TermuxProMenu(App):
     def close_sessions(self):
         """Fecha todas as sessões"""
         self.query_one("#output", Static).update("Por favor, pressione Enter para fechar todas as sessões.")
-        self.query_one("#enter_button", Button).update("Pressione Enter")
+        self.query_one("#enter_button", Button).disabled = False  # Habilita o botão de "Enter"
     
     @on(Button.Pressed, "#enter_button")
     def press_enter(self):
         """Simula pressionamento de Enter"""
         self.run_command("exit", "Sessões encerradas!")
         self.query_one("#output", Static).update("Todas as sessões foram fechadas.")
+        self.query_one("#enter_button", Button).disabled = True  # Desabilita o botão após o uso
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
@@ -145,4 +145,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-    
+                
