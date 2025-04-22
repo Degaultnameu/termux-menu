@@ -1,70 +1,62 @@
-# 🚀 Termux Menu - Menu Interativo Premium para Termux
+markdown
+# 📲 Guia de Instalação do Termux Menu
 
-![Termux](https://img.shields.io/badge/Termux-000000?style=for-the-badge&logo=termux&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Textual](https://img.shields.io/badge/Textual-5C4EE5?style=for-the-badge)
+## Pré-requisitos
+- Termux atualizado
+- Conexão com internet
 
-**O menu definitivo para turbinar seu Termux!** Uma interface elegante e funcional criada com Python + Textual, oferecendo atalhos essenciais para seu dia a dia no terminal Android.
-
-## ✨ Recursos
-✔️ **Acesso rápido** a funções essenciais do Termux  
-✔️ **Interface intuitiva** com design moderno  
-✔️ **Configuração automática** ao iniciar o terminal  
-✔️ **Sistema de aliases** para comandos personalizados  
-✔️ **Totalmente customizável** - edite conforme sua necessidade  
-
-## 📥 Instalação Rápida
-1. Clone o repositório:
+## 🔧 Instalação Automática (Recomendado)
 ```bash
-git clone https://github.com/Degaultnameu/termux-menu.git
-cd termux-menu
-pkg install python -y
-pip install textual
-
-2. Instale as dependências:
-
+curl -sL https://raw.githubusercontent.com/Degaultnameu/termux-menu/main/install.sh | bash
+📚 Instalação Manual (Passo a Passo)
+1. Clonar o Repositório
 bash
-pkg install python -y
-pip install textual
-Execute:
-
+git clone https://github.com/Degaultnameu/termux-menu.git ~/termux-menu
+cd ~/termux-menu
+2. Tornar o Instalador Executável
 bash
-python3 termux_menu.py
-⚙️ Configuração Avançada
-Para iniciar automaticamente ao abrir o Termux, edite seu .bashrc:
+chmod +x install.sh
+3. Executar a Instalação
+bash
+./install.sh
+4. Reiniciar o Termux
+bash
+exit
+🛠 Solução de Problemas
+Pasta já existe?
+bash
+rm -rf ~/termux-menu  # Remove a pasta existente
+git clone https://github.com/Degaultnameu/termux-menu.git ~/termux-menu
+Erros de permissão?
+bash
+termux-setup-storage
+pkg update && pkg upgrade -y
+🌟 Recursos Instalados
+Menu automático ao iniciar
 
-echo -e '\n# Auto-start Termux Menu\nif [ -n "$PS1" ]; then\n    python3 ~/termux-menu/termux_menu.py || true\nfi' >> ~/.bashrc
-source ~/.bashrc
+Atalho turbo para comandos rápidos
 
+Interface profissional com Textual
 
-
-🎨 Screenshot
-Menu Preview
-
-🤝 Contribuição
-Contribuições são bem-vindas! Siga estes passos:
-
-Faça um Fork
-
-Crie sua branch (git checkout -b feature/incrivel)
-
-Commit suas mudanças (git commit -m 'Adiciona feature incrível')
-
-Push para a branch (git push origin feature/incrivel)
-
-Abra um Pull Request
-
-📜 Licença
+▶️ Ver Demonstração <!-- Adicione link para gif/screenshot -->
 
 
-### 🔍 Destaques:
-1. **Badges profissionais** - Mostra as tecnologias usadas
-2. **Emojis organizados** - Melhora a visualização
-3. **Seções claras** - Instalação básica vs avançada
-4. **Chamada para contribuição** - Padrão GitHub
-5. **Espaço para screenshot** - Basta substituir o placeholder
+### 💡 Dicas para o README:
+1. **Adicione um gif** mostrando a instalação e uso (use [Kap](https://getkap.co/) ou ScreenToGif)
+2. **Inclua badges** no topo:
+   ```markdown
+   ![GitHub stars](https://img.shields.io/github/stars/Degaultnameu/termux-menu?style=social)
+   ![License](https://img.shields.io/badge/license-MIT-blue)
+Seção "Contribuição":
 
-### 💡 Dica extra:
-Adicione um arquivo `screenshot.png` real do seu menu no projeto e atualize o link no README para ficar ainda mais profissional!
+markdown
+## 🤝 Como Contribuir
+1. Faça um Fork
+2. Crie sua branch (`git checkout -b feature/nova-funcao`)
+3. Commit suas mudanças (`git commit -m 'Add nova feature'`)
+4. Push para a branch (`git push origin feature/nova-funcao`)
+5. Abra um Pull Request
+Quer que eu gere um arquivo README.md completo para você colar no repositório? 😊
 
-Quer que eu ajuste algo específico na descrição? 😊
+New chat
+Message DeepSeek
