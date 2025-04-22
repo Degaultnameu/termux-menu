@@ -1,62 +1,57 @@
-markdown
-# 📲 Guia de Instalação do Termux Menu
+# 🚀 Guia de Instalação Passo a Passo
 
-## Pré-requisitos
+## 🔌 Pré-requisitos
+Verifique se você tem:
 - Termux atualizado
-- Conexão com internet
+- Armazenamento permitido
 
-## 🔧 Instalação Automática (Recomendado)
+## 📦 Instalação Automática (Recomendado)
+Execute este comando único:
+
 ```bash
 curl -sL https://raw.githubusercontent.com/Degaultnameu/termux-menu/main/install.sh | bash
-📚 Instalação Manual (Passo a Passo)
-1. Clonar o Repositório
+
+🛠️ Instalação Manual
+1. Clonar o repositório
 bash
 git clone https://github.com/Degaultnameu/termux-menu.git ~/termux-menu
+2. Acessar a pasta
+bash
 cd ~/termux-menu
-2. Tornar o Instalador Executável
+3. Dar permissão de execução
 bash
 chmod +x install.sh
-3. Executar a Instalação
+4. Executar instalação
 bash
 ./install.sh
-4. Reiniciar o Termux
+5. Reiniciar o Termux
 bash
 exit
-🛠 Solução de Problemas
-Pasta já existe?
+🚑 Solução de Problemas
+Se a pasta já existir:
 bash
-rm -rf ~/termux-menu  # Remove a pasta existente
-git clone https://github.com/Degaultnameu/termux-menu.git ~/termux-menu
-Erros de permissão?
+rm -rf ~/termux-menu
+Depois repita o processo de instalação.
+
+Se faltar permissões:
 bash
 termux-setup-storage
+Atualizar pacotes:
+bash
 pkg update && pkg upgrade -y
-🌟 Recursos Instalados
-Menu automático ao iniciar
+🔥 Recursos Instalados
+Menu automático ao abrir o Termux
 
-Atalho turbo para comandos rápidos
+Comando rápido turbo
 
-Interface profissional com Textual
+Design profissional
 
-▶️ Ver Demonstração <!-- Adicione link para gif/screenshot -->
+Dica: Após instalar, feche e reabra o Termux para ativar!
 
 
-### 💡 Dicas para o README:
-1. **Adicione um gif** mostrando a instalação e uso (use [Kap](https://getkap.co/) ou ScreenToGif)
-2. **Inclua badges** no topo:
-   ```markdown
-   ![GitHub stars](https://img.shields.io/github/stars/Degaultnameu/termux-menu?style=social)
-   ![License](https://img.shields.io/badge/license-MIT-blue)
-Seção "Contribuição":
-
-markdown
-## 🤝 Como Contribuir
-1. Faça um Fork
-2. Crie sua branch (`git checkout -b feature/nova-funcao`)
-3. Commit suas mudanças (`git commit -m 'Add nova feature'`)
-4. Push para a branch (`git push origin feature/nova-funcao`)
-5. Abra um Pull Request
-Quer que eu gere um arquivo README.md completo para você colar no repositório? 😊
-
-New chat
-Message DeepSeek
+### ✨ Melhorias desta versão:
+1. **Blocos independentes** - Cada comando pode ser copiado separadamente
+2. **Símbolos visuais** - Ícones para cada seção
+3. **Espaçamento inteligente** - Facilita a leitura móvel
+4. **Destaques** - Comandos críticos em caixas isoladas
+5. **Solução rápida** - Seções de erro separadas
