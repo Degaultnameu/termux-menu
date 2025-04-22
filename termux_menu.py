@@ -49,10 +49,34 @@ class TermuxProMenu(App):
     }
     """
 
+    # Mensagem padrão do motd
+    DEFAULT_MOTD = """Welcome to Termux!
+
+Docs:       https://termux.dev/docs
+Donate:     https://termux.dev/donate
+Community:  https://termux.dev/community
+
+Working with packages:
+
+ - Search:  pkg search <query>
+ - Install: pkg install <package>
+ - Upgrade: pkg upgrade
+
+Subscribing to additional repositories:
+
+ - Root:    pkg install root-repo
+ - X11:     pkg install x11-repo
+
+For fixing any repository issues,
+try 'termux-change-repo' command.
+
+Report issues at https://termux.dev/issues
+"""
+
     def compose(self) -> ComposeResult:
         with Center():
             with Vertical(id="main"):
-                yield Static("PANELA TERMINAL", id="title")
+                yield Static("RUSC521 TERMINAL", id="title")
                 yield Button("TERMINAL", id="terminal", classes="btn")
                 yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
@@ -65,6 +89,8 @@ class TermuxProMenu(App):
                 yield Input(id="new_message", placeholder="Digite a nova mensagem de boas-vindas...")
                 # Adicionando o botão "Salvar Config"
                 yield Button("SALVAR CONFIG", id="save_config", classes="btn")
+                # Adicionando o botão "Reset"
+                yield Button("RESET", id="reset_config", classes="btn")
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -90,7 +116,6 @@ class TermuxProMenu(App):
     @on(Button.Pressed, "#config")
     def edit_config(self):
         """Edita a configuração de boas-vindas"""
-        # Aqui você só quer abrir o campo de input
         self.query_one("#output", Static).update("Digite a nova mensagem de boas-vindas...")
 
     @on(Button.Pressed, "#save_config")
@@ -102,6 +127,13 @@ class TermuxProMenu(App):
             self.save_welcome_message(new_message)
         else:
             self.query_one("#output", Static).update("Por favor, insira uma nova mensagem.")
+
+    @on(Button.Pressed, "#reset_config")
+    def reset_config(self):
+        """Restaura a mensagem de boas-vindas padrão e limpa o campo de entrada"""
+        self.save_welcome_message(self.DEFAULT_MOTD)  # Restaurar o motd padrão
+        self.query_one("#new_message", Input).value = ""  # Limpa o campo de entrada
+        self.query_one("#output", Static).update("Mensagem de boas-vindas restaurada para o padrão!")
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
