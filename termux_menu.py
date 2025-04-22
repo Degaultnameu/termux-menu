@@ -60,6 +60,8 @@ class TermuxProMenu(App):
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
+                yield Input(placeholder="Digite o novo conteúdo da config...", id="config_input", visible=False)
+                yield Button("SALVAR CONFIG", id="save_config", classes="btn", visible=False)
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -84,8 +86,27 @@ class TermuxProMenu(App):
 
     @on(Button.Pressed, "#config")
     def edit_config(self):
-        """Edita configuração"""
-        self.run_command("nano ~/.termux/termux.properties", "Editando config...")
+        """Exibe campo para editar configuração"""
+        self.query_one("#config_input", Input).visible = True
+        self.query_one("#save_config", Button).visible = True
+        self.query_one("#output", Static).update("Digite o novo conteúdo e clique em SALVAR CONFIG.")
+
+    @on(Button.Pressed, "#save_config")
+    def save_config(self):
+        """Salva novo conteúdo no termux.properties"""
+        input_widget = self.query_one("#config_input", Input)
+        new_content = input_widget.value
+
+        try:
+            os.makedirs(os.path.expanduser("~/.termux"), exist_ok=True)
+            with open(os.path.expanduser("~/.termux/termux.properties"), "w") as f:
+                f.write(new_content)
+            self.query_one("#output", Static).update("Configuração salva com sucesso!")
+        except Exception as e:
+            self.query_one("#output", Static).update(f"Erro ao salvar: {str(e)}")
+
+        input_widget.visible = False
+        self.query_one("#save_config", Button).visible = False
 
     @on(Button.Pressed, "#exit")
     def exit_app(self):
@@ -111,3 +132,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
+    
