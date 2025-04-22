@@ -14,8 +14,11 @@ class TermuxMenu(App):
 
     CSS = """
     Screen {
-        align: center middle;
+        /* align: center middle;  Incorrect.  Use align-items and justify-content on a container. */
         background: #121212;
+        layout: vertical;  /* Add this to control layout */
+        align-items: center; /* Center horizontally */
+        justify-content: center; /* Center vertically */
     }
     #main {
         width: 90%;
@@ -25,36 +28,39 @@ class TermuxMenu(App):
     }
     .btn {
         width: 100%;
-        margin: 1 0;
+        margin-top: 1; /* Explicit margins */
+        margin-bottom: 1;
         background: #252525;
         color: white;
         border: none;
         border-radius: 5px;
-        padding: 0.5em;
+        padding: 5; /* Try integer padding */
     }
     .btn:hover {
         background: #333333;
     }
     #output {
-        margin: 1 0;
+        margin-top: 1;
+        margin-bottom: 1;
         padding: 1;
         background: #1e1e1e;
         color: #f0f0f0;
         border-radius: 5px;
-        font-family: monospace;
-        font-size: 0.9em;
+        font-family: "monospace"; /* Add quotes */
+        font-size: 9; /* Try integer font size */
     }
     #enter_button { display: none; }
     #title {
-        font-size: 2em;
+        font-size: 20; /* Try integer font size */
         text-align: center;
-        margin-bottom: 1em;
+        margin-bottom: 1;
         color: #00aaff;
     }
     #input {
         width: 100%;
-        margin: 1 0;
-        padding: 0.5em;
+        margin-top: 1;
+        margin-bottom: 1;
+        padding: 5; /* Try integer padding */
         background: #252525;
         color: white;
         border: none;
@@ -64,14 +70,14 @@ class TermuxMenu(App):
         width: 100%;
         text-align: center;
         color: #888888;
-        font-size: 0.8em;
-        margin-top: 1em;
+        font-size: 8; /* Try integer font size */
+        margin-top: 1;
     }
     #loading {
         display: none;
         text-align: center;
         color: #00aaff;
-        margin-bottom: 0.5em;
+        margin-bottom: 5; /* Try integer margin */
     }
     """
 
@@ -155,4 +161,4 @@ class TermuxMenu(App):
 
 if __name__ == "__main__":
     TermuxMenu().run()
-    
+                
