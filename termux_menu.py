@@ -52,7 +52,7 @@ class TermuxProMenu(App):
     def compose(self) -> ComposeResult:
         with Center():
             with Vertical(id="main"):
-                yield Static("RUSC521 TERMINAL", id="title")
+                yield Static("PANELA TERMINAL", id="title")
                 yield Button("TERMINAL", id="terminal", classes="btn")
                 yield Button("ATUALIZAR PACOTES", id="update", classes="btn")
                 yield Button("LIMPAR TELA", id="clear", classes="btn")
@@ -60,8 +60,11 @@ class TermuxProMenu(App):
                 yield Button("EDITAR CONFIG", id="config", classes="btn")
                 yield Button("SAIR", id="exit", classes="btn")
                 yield Static("", id="output")
+
                 # Adicionando o campo de entrada para editar a mensagem
                 yield Input(id="new_message", placeholder="Digite a nova mensagem de boas-vindas...")
+                # Adicionando o botão "Salvar Config"
+                yield Button("SALVAR CONFIG", id="save_config", classes="btn")
 
     @on(Button.Pressed, "#terminal")
     def open_terminal(self):
@@ -87,11 +90,16 @@ class TermuxProMenu(App):
     @on(Button.Pressed, "#config")
     def edit_config(self):
         """Edita a configuração de boas-vindas"""
+        # Aqui você só quer abrir o campo de input
+        self.query_one("#output", Static).update("Digite a nova mensagem de boas-vindas...")
+
+    @on(Button.Pressed, "#save_config")
+    def save_config(self):
+        """Captura o texto do campo de entrada e salva no motd"""
         new_message = self.query_one("#new_message", Input).value
         if new_message:
             # Salva a nova mensagem no arquivo motd
             self.save_welcome_message(new_message)
-            self.query_one("#output", Static).update("Mensagem de boas-vindas atualizada com sucesso!")
         else:
             self.query_one("#output", Static).update("Por favor, insira uma nova mensagem.")
 
@@ -106,6 +114,9 @@ class TermuxProMenu(App):
             motd_file = "/data/data/com.termux/files/usr/etc/motd"
             with open(motd_file, "w") as file:
                 file.write(message)
+            self.query_one("#output", Static).update("Mensagem de boas-vindas atualizada com sucesso!")
+        except PermissionError:
+            self.query_one("#output", Static).update("Erro: Permissão negada ao tentar modificar o motd.")
         except Exception as e:
             self.query_one("#output", Static).update(f"Erro ao salvar a mensagem: {str(e)}")
 
@@ -128,4 +139,4 @@ class TermuxProMenu(App):
 
 if __name__ == "__main__":
     TermuxProMenu().run()
-        
+    
