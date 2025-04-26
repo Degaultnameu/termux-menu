@@ -19,8 +19,8 @@ class TermuxVIP(App):
         text-align: center;
         height: 3;
         padding: 1 0;
-        border-radius: 5px;  /* Bordas arredondadas */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);  /* Sombra */
+        /* border-radius: 5px;  Removido devido a incompatibilidade */
+        /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);  Removido devido a incompatibilidade */
     }
 
     .btn {
@@ -31,7 +31,7 @@ class TermuxVIP(App):
         border: solid #4caf50;  /* Verde mais suave */
         background: #2e7d32;  /* Fundo do botão */
         color: white;  /* Cor do texto */
-        border-radius: 5px;  /* Bordas arredondadas */
+        /* border-radius: 5px;  Removido devido a incompatibilidade */
         transition: background 0.3s;  /* Transição suave */
     }
 
