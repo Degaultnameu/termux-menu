@@ -12,8 +12,6 @@ import os
 class TermuxMenu(App):
     """Menu Termux Simplificado com Funções Essenciais"""
 
-
-
     welcome_msg = "Termux Premium - Digite um comando ou selecione uma opção"
     is_loading = reactive(False)
 
@@ -94,4 +92,29 @@ class TermuxMenu(App):
 
 if __name__ == "__main__":
     TermuxMenu().run()
-                
+
+
+# XML equivalente ao layout do TermuxMenu
+xml_layout = """
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TERMUX PRO" />
+    <TextView android:id="@+id/loading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" />
+    <Button android:id="@+id/terminal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Terminal" />
+    <Button android:id="@+id/update" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Atualizar Pacotes" />
+    <Button android:id="@+id/clear" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Limpar Tela" />
+    <Button android:id="@+id/windows" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Listar Janelas" />
+    <Button android:id="@+id/config" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Configurações" />
+    <TextView android:id="@+id/output" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Termux Premium - Digite um comando ou selecione uma opção" />
+    <EditText android:id="@+id/input" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Comando..." />
+    <Button android:id="@+id/run_command" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Executar Comando" />
+    <Button android:id="@+id/enter_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Encerrar Sessões" />
+    <Button android:id="@+id/exit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sair" />
+    <TextView android:id="@+id/footer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Criado por IA" />
+
+</LinearLayout>
+"""
