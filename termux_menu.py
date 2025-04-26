@@ -9,33 +9,32 @@ import subprocess
 class TermuxVIP(App):
     CSS = """
     Screen {
-        align: center middle;
-        background: #1e1e1e;  /* Cor de fundo mais suave */
-    }
+    align: center middle;
+    background: #1e1e1e;  /* Softer background color */
+}
 
-    #header {
-        background: #007acc;  /* Azul mais suave */
-        color: white;
-        text-align: center;
-        height: 3;
-        padding: 1 0;
-    }
+#header {
+    background: #007acc;  /* Softer blue */
+    color: white;
+    text-align: center;
+    height: 3;
+    padding: 1 0;
+}
 
-    .btn {
-        width: 80%;
-        max-width: 30;
-        margin: 1 0;
-        content-align: center middle;
-        border: solid #4caf50;  /* Verde mais suave */
-        background: #2e7d32;  /* Fundo do botão */
-        color: white;  /* Cor do texto */
-        transition: background 0.3s;  /* Transição suave */
-    }
+.btn {
+    width: 80%;
+    max-width: 30;
+    margin: 1 0;
+    content-align: center middle;
+    border: solid #4caf50;  /* Softer green */
+    background: #2e7d32;  /* Button background */
+    color: white;  /* Text color */
+    transition: background 0.3s;  /* Smooth transition */
+}
 
-    .btn:hover {
-        background: #388e3c;  /* Cor do botão ao passar o mouse */
-    }
-    """
+.btn:hover {
+    background: #388e3c;  /* Button color on hover */
+}
 
     is_loading = reactive(False)
 
