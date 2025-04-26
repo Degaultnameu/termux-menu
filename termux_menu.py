@@ -10,15 +10,17 @@ class TermuxVIP(App):
     CSS = """
     Screen {
         align: center middle;
-        background: black;
+        background: #1e1e1e;  /* Cor de fundo mais suave */
     }
 
     #header {
-        background: blue;
+        background: #007acc;  /* Azul mais suave */
         color: white;
         text-align: center;
         height: 3;
         padding: 1 0;
+        border-radius: 5px;  /* Bordas arredondadas */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);  /* Sombra */
     }
 
     .btn {
@@ -26,7 +28,15 @@ class TermuxVIP(App):
         max-width: 30;
         margin: 1 0;
         content-align: center middle;
-        border: solid green;
+        border: solid #4caf50;  /* Verde mais suave */
+        background: #2e7d32;  /* Fundo do botão */
+        color: white;  /* Cor do texto */
+        border-radius: 5px;  /* Bordas arredondadas */
+        transition: background 0.3s;  /* Transição suave */
+    }
+
+    .btn:hover {
+        background: #388e3c;  /* Cor do botão ao passar o mouse */
     }
     """
 
