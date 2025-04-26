@@ -18,16 +18,15 @@ class TermuxVIP(App):
         color: white;
         text-align: center;
         height: 3;
-        content-align: center middle;
-        font-family: "Times New Roman";
-        font-size: 15;
-        font-weight: bold;
+        padding: 1 0;
     }
 
     .btn {
-        width: 30%;
+        width: 80%;
+        max-width: 30;
         margin: 1 0;
         content-align: center middle;
+        border: solid green;
     }
     """
 
