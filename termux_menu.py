@@ -33,9 +33,9 @@ class TermuxVIP(App):
 }
 
 .btn:hover {
-    background: #388e3c;  /* Button color on hover */
-}
-
+    background: #388e3c;  /* Cor do botão ao passar o mouse */
+    }
+    """
     is_loading = reactive(False)
 
     def compose(self) -> ComposeResult:
